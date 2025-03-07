@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestor de PDFs Minimalista</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #333;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+    /* Logos: se aplica filtro invert para convertir PNG blanco en negro */
+    .logo-img {
+      width: 50px;
+      height: auto;
+      filter: invert(100%);
+      margin-right: 10px;
+    }
+    .logo-text {
+      width: 150px;
+      height: auto;
+      filter: invert(100%);
+    }
+    /* Contenedor de filtros: búsqueda y select de categoría */
+    .filter-container {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .filter-container .form-control,
+    .filter-container .form-select {
+      flex: 1;
+      min-width: 200px;
+    }
+    .pdf-item {
+      margin-bottom: 20px;
+    }
+    /* Estilo para las imágenes de las portadas de PDFs */
+    .card img {
+      border-radius: 4px;
+      max-width: 100px;
+      display: block;
+      margin: 0 auto;
+    }
+    .card-body {
+      padding: 0.5rem 0;
+      text-align: center;
+    }
+    .card-title {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .card-text {
+      font-size: 0.875rem;
+      color: #666;
+    }
+    .card {
+      border: none;
+      background: none;
+    }
+    /* Estilos personalizados para el modal */
+    .custom-modal .modal-content {
+      background: #f8f9fa; /* fondo claro */
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: none;
+    }
+    .custom-modal .modal-header {
+      border-bottom: none;
+      background: #343a40;
+      color: #fff;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    .custom-modal .modal-header .modal-title {
+      font-weight: bold;
+    }
+    .custom-modal .modal-body {
+      padding: 20px;
+      font-size: 1rem;
+    }
+    .custom-modal .modal-footer {
+      border-top: none;
+      justify-content: center;
+    }
+    .custom-modal .btn-close {
+      filter: invert(100%);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header con logos -->
+  <header>
+    <img src="logo.png" alt="Logo" class="logo-img">
+    <img src="logo-texto.png" alt="Logo Texto" class="logo-text">
+  </header>
+  
+  <!-- Contenedor de filtros: Buscador y categoría -->
+  <div class="container">
+    <div class="filter-container">
+      <div class="input-group">
+        <span class="input-group-text" id="search-addon">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="search" id="searchInput" class="form-control" placeholder="Buscar PDF..." aria-label="Buscar PDF" aria-describedby="search-addon">
+      </div>
+      <select id="categoryFilter" class="form-select">
+        <option value="">Todas las categorías</option>
+      </select>
+    </div>
+  </div>
+  
+  <!-- Contenedor principal para mostrar PDFs -->
+  <div class="container">
+    <div class="row" id="pdfContainer"></div>
+  </div>
+  
+  <!-- Modal informativo personalizado -->
+  <div class="modal fade custom-modal" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="infoModalLabel">Aviso Importante</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Esta página está en sus primeras fases de desarrollo, aún carece de contenido.
+            
+          </p>
+          <p>
+            Aportar contenido:
+          </p>
+          <p class="text-center">
+            <a href="https://wa.me/51925080132?text=Hola,%20quisiera%20aportar%20el%20siguiente%20contenido:" target="_blank" class="d-flex align-items-center justify-content-center text-decoration-none">
+              <img src="whatsapp.png" alt="WhatsApp" style="width: 20px; height: auto; margin-right: 2px; filter: invert(100%);">
+              <span style="font-weight: bold; color: #343a40;">WhatsApp</span>
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap Bundle JS (incluye Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Socket.io (si ya lo usas, de lo contrario se omite) -->
+  <script src="/socket.io/socket.io.js"></script>
+  
+  <script>
+    let pdfData = [];
+    
+    // Crea una tarjeta minimalista para cada PDF
+    function createPdfItem(pdf) {
+      const col = document.createElement('div');
+      col.className = 'col-6 col-sm-4 col-md-3 pdf-item';
+      
+      const card = document.createElement('div');
+      card.className = 'card';
+      
+      const link = document.createElement('a');
+      link.href = pdf.pdf;
+      link.target = '_blank';
+      
+      const img = document.createElement('img');
+      img.src = pdf.cover;
+      img.alt = 'Portada de ' + pdf.name;
+      img.className = 'card-img-top';
+      link.appendChild(img);
+      
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body';
+      
+      const title = document.createElement('h5');
+      title.className = 'card-title';
+      title.textContent = pdf.name;
+      
+      const size = document.createElement('p');
+      size.className = 'card-text';
+      size.textContent = (pdf.size / (1024 * 1024)).toFixed(2) + ' MB';
+      
+      const category = document.createElement('p');
+      category.className = 'card-text';
+      category.textContent = 'Categoría: ' + pdf.category;
+      
+      cardBody.appendChild(title);
+      cardBody.appendChild(size);
+      cardBody.appendChild(category);
+      card.appendChild(link);
+      card.appendChild(cardBody);
+      col.appendChild(card);
+      
+      return col;
+    }
+    
+    // Renderiza el listado de PDFs en la grilla
+    function renderPdfs(pdfs) {
+      const container = document.getElementById('pdfContainer');
+      container.innerHTML = '';
+      pdfs.forEach(pdf => container.appendChild(createPdfItem(pdf)));
+    }
+    
+    // Llena el select de categorías con las únicas encontradas en los datos
+    function populateCategoryFilter(pdfs) {
+      const categorySelect = document.getElementById('categoryFilter');
+      const categories = Array.from(new Set(pdfs.map(pdf => pdf.category)));
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        categorySelect.appendChild(option);
+      });
+    }
+    
+    // Filtra PDFs por nombre y categoría
+    function filterAndRender() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const selectedCategory = document.getElementById('categoryFilter').value;
+      const filtered = pdfData.filter(pdf => {
+        const matchesName = pdf.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = selectedCategory === '' || pdf.category === selectedCategory;
+        return matchesName && matchesCategory;
+      });
+      renderPdfs(filtered);
+    }
+    
+    // Event listeners para búsqueda y filtro
+    document.getElementById('searchInput').addEventListener('input', filterAndRender);
+    document.getElementById('categoryFilter').addEventListener('change', filterAndRender);
+    
+    // Cargar los datos desde el endpoint /api/pdfs
+    fetch('/api/pdfs')
+      .then(response => response.json())
+      .then(data => {
+        pdfData = data;
+        populateCategoryFilter(pdfData);
+        renderPdfs(pdfData);
+      })
+      .catch(err => console.error('Error cargando PDFs:', err));
+      
+    // Mostrar modal de aviso al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      var infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+      infoModal.show();
+    });
+  </script>
+</body>
+</html>
