@@ -41,7 +41,7 @@ function getPdfFiles(baseDir, relativePath = '') {
   return pdfFiles;
 }
 
-// Función para generar la portada de un PDF usando pdftoppm con -singlefile
+// Función para generar la portada de un PDF usando pdftoppm y redimensionarla a 200px de ancho
 function generateCover(pdfPath, coverFullPath) {
   return new Promise((resolve, reject) => {
     // Aseguramos que exista la carpeta destino
@@ -51,7 +51,8 @@ function generateCover(pdfPath, coverFullPath) {
     }
     // Eliminamos la extensión para usar -singlefile y obtener directamente outputBase.jpg
     const outputBase = coverFullPath.slice(0, -4);
-    const cmd = `pdftoppm -jpeg -singlefile -f 1 -l 1 "${pdfPath}" "${outputBase}"`;
+    // Se genera la portada con pdftoppm (ajustando la calidad) y luego se redimensiona con ImageMagick
+    const cmd = `pdftoppm -jpeg -jpegopt quality=30 -singlefile -f 1 -l 1 "${pdfPath}" "${outputBase}" && convert "${coverFullPath}" -resize 200 "${coverFullPath}"`;
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
         console.error('Error generando portada para:', pdfPath, error);
