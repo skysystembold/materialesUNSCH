@@ -9,7 +9,8 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
 
-const PORT = process.env.PORT || 3000;
+// puerto por defecto 10000
+const PORT = process.env.PORT || 10000;
 
 const pdfFolder = path.join(__dirname, 'pdfs');
 const coversFolder = path.join(__dirname, 'covers');
@@ -78,16 +79,16 @@ async function processPdfs() {
     pdf.coverRelative = coverRelPath;
     if (!fs.existsSync(coverFullPath)) {
       try {
-        console.log(`✅EXITO: ${pdf.relativePdfPath}`);
+        console.log(`Generando portada para: ${pdf.relativePdfPath}`);
         await generateCover(pdf.fullPath, coverFullPath);
       } catch (err) {
-        console.error('❌ERROR:', pdf.relativePdfPath, err);
+        console.error('Error generando portada para:', pdf.relativePdfPath, err);
       }
     }
   }
 }
 
-// Middleware para servir index.html y registrar la IP
+// Middleware para servir index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
@@ -127,11 +128,11 @@ let connectedUsers = 0;
 // Configuración de Socket.io para registrar conexiones y desconexiones
 io.on('connection', (socket) => {
   connectedUsers++;
-  console.log(`Users: ${connectedUsers}`);
+  console.log(`Usuarios conectados: ${connectedUsers}`);
 
   socket.on('disconnect', () => {
     connectedUsers--;
-    console.log(`Users: ${connectedUsers}`);
+    console.log(`Usuarios conectados: ${connectedUsers}`);
   });
 });
 
