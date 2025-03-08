@@ -170,8 +170,6 @@
   
   <!-- Bootstrap Bundle JS (incluye Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Socket.io (si ya lo usas, de lo contrario se omite) -->
-  <script src="/socket.io/socket.io.js"></script>
   
   <script>
     let pdfData = [];
@@ -269,6 +267,11 @@
       var infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
       infoModal.show();
     });
+  </script>
+  <!-- Socket.io (cargar una sola vez) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
   </script>
 </body>
 </html>

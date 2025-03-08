@@ -78,10 +78,10 @@ async function processPdfs() {
     pdf.coverRelative = coverRelPath;
     if (!fs.existsSync(coverFullPath)) {
       try {
-        console.log(`Generando portada para ${pdf.relativePdfPath}`);
+        console.log(`✅EXITO: ${pdf.relativePdfPath}`);
         await generateCover(pdf.fullPath, coverFullPath);
       } catch (err) {
-        console.error('Error al procesar', pdf.relativePdfPath, err);
+        console.error('❌ERROR:', pdf.relativePdfPath, err);
       }
     }
   }
@@ -120,13 +120,12 @@ let connectedUsers = 0;
 
 // Configuración de Socket.io para registrar conexiones y desconexiones
 io.on('connection', (socket) => {
-  const ip = socket.handshake.address;
   connectedUsers++;
-  console.log(`Usuario conectado: ${ip}. Total usuarios conectados: ${connectedUsers}`);
+  console.log(`Users: ${connectedUsers}`);
 
   socket.on('disconnect', () => {
     connectedUsers--;
-    console.log(`Usuario desconectado: ${ip}. Total usuarios conectados: ${connectedUsers}`);
+    console.log(`Users: ${connectedUsers}`);
   });
 });
 
