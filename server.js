@@ -116,7 +116,7 @@ app.use(express.static('public'));
 
 // Middleware para registrar descargas en la ruta /pdfs
 app.use('/pdfs', (req, res, next) => {
-  console.log(`Un usuario descargó el archivo: ${req.path}`);
+  console.log(`📂DESCARGA: ${req.path}`);
   next();
 }, express.static(pdfFolder));
 
@@ -128,11 +128,11 @@ let connectedUsers = 0;
 // Configuración de Socket.io para registrar conexiones y desconexiones
 io.on('connection', (socket) => {
   connectedUsers++;
-  console.log(`Usuarios conectados: ${connectedUsers}`);
+  console.log(`🟢 USERS: ${connectedUsers}`);
 
   socket.on('disconnect', () => {
     connectedUsers--;
-    console.log(`Usuarios conectados: ${connectedUsers}`);
+    console.log(`🔴 USERS: ${connectedUsers}`);
   });
 });
 

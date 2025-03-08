@@ -145,7 +145,7 @@
         <input type="search" id="searchInput" class="form-control" placeholder="Buscar PDF..." aria-label="Buscar PDF" aria-describedby="search-addon">
       </div>
       <select id="categoryFilter" class="form-select">
-        <option value="">Todas las categorías</option>
+        <option value="">Todos</option>
       </select>
     </div>
   </div>
@@ -235,7 +235,7 @@
 
       const category = document.createElement('p');
       category.className = 'card-text';
-      category.textContent = 'Categoría: ' + pdf.category;
+      category.textContent = 'Curso: ' + pdf.category;
 
       cardBody.appendChild(title);
       cardBody.appendChild(size);
