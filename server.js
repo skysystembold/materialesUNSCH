@@ -1,3 +1,4 @@
+// Javascript: main.js
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -5,11 +6,14 @@ const { exec } = require('child_process');
 const http = require('http');
 
 const app = express();
+// Configurar Express para confiar en el proxy de Render
+app.set('trust proxy', true);
+
 const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
 
-// puerto por defecto 10000
+// Puerto por defecto 10000
 const PORT = process.env.PORT || 10000;
 
 const pdfFolder = path.join(__dirname, 'pdfs');
@@ -127,6 +131,13 @@ let connectedUsers = 0;
 
 // Configuración de Socket.io para registrar conexiones y desconexiones
 io.on('connection', (socket) => {
+  // Obtener la IP del cliente
+  let clientIp = socket.handshake.address;
+  if (socket.handshake.headers['x-forwarded-for']) {
+    clientIp = socket.handshake.headers['x-forwarded-for'].split(',')[0].trim();
+  }
+  console.log(`Conexión desde la IP: ${clientIp}`);
+
   connectedUsers++;
   console.log(`🟢 USERS: ${connectedUsers}`);
 
