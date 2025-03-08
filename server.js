@@ -136,14 +136,13 @@ io.on('connection', (socket) => {
   if (socket.handshake.headers['x-forwarded-for']) {
     clientIp = socket.handshake.headers['x-forwarded-for'].split(',')[0].trim();
   }
-  console.log(`Conexión desde la IP: ${clientIp}`);
 
   connectedUsers++;
-  console.log(`🟢 USERS: ${connectedUsers}`);
+  console.log(`🟢${connectedUsers}|+Usr[${clientIp}]`);
 
   socket.on('disconnect', () => {
     connectedUsers--;
-    console.log(`🔴 USERS: ${connectedUsers}`);
+    console.log(`🔴${connectedUsers}|-Usr[${clientIp}]`);
   });
 });
 
