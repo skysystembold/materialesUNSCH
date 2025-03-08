@@ -87,7 +87,7 @@ async function processPdfs() {
   }
 }
 
-// Middleware para registrar la IP al servir index.html
+// Middleware para servir index.html y registrar la IP
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
@@ -112,7 +112,13 @@ app.get('/api/pdfs', (req, res) => {
 
 // Servir archivos estáticos: public, pdfs y covers
 app.use(express.static('public'));
-app.use('/pdfs', express.static(pdfFolder));
+
+// Middleware para registrar descargas en la ruta /pdfs
+app.use('/pdfs', (req, res, next) => {
+  console.log(`Un usuario descargó el archivo: ${req.path}`);
+  next();
+}, express.static(pdfFolder));
+
 app.use('/covers', express.static(coversFolder));
 
 // Variables para contar usuarios conectados
