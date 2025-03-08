@@ -116,7 +116,7 @@ app.use(express.static('public'));
 
 // Middleware para registrar descargas en la ruta /pdfs
 app.use('/pdfs', (req, res, next) => {
-  console.log(`📂DESCARGA: ${req.path}`);
+  console.log(`📂DESCARGA: ${decodeURIComponent(req.path)}`);
   next();
 }, express.static(pdfFolder));
 
